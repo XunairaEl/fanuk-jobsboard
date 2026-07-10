@@ -90,6 +90,7 @@ filters:
     - tech
     - it
     - solutions
+    - solution
 
   # Roles whose TITLE matches any of these are excluded even if a tech keyword
   # also matched (e.g. a sales role in a "Platform" department).
