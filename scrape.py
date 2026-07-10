@@ -212,6 +212,35 @@ def filtered_jobs(raw_jobs, cfg):
     return [j for j in raw_jobs if is_uk(j["location"], cfg) and is_tech(j, cfg)]
 
 
+def classify_discipline(job, cfg):
+    haystack = f"{job['title']} {job['department']}".lower()
+    for discipline, keywords in cfg["disciplines"].items():
+        if any(re.search(rf"\b{re.escape(str(k))}\b", haystack) for k in keywords):
+            return discipline
+    return "Other"
+
+
+NON_LONDON_PLACES = None  # cached from config on first use
+
+
+def location_tags(location, cfg):
+    global NON_LONDON_PLACES
+    if NON_LONDON_PLACES is None:
+        NON_LONDON_PLACES = [s for s in cfg["filters"]["uk_location_substrings"]
+                             if s not in ("london", "united kingdom", "england")]
+    loc = location.lower()
+    tags = []
+    if "london" in loc:
+        tags.append("London")
+    if any(p in loc for p in NON_LONDON_PLACES):
+        tags.append("Outside London")
+    if "remote" in loc or "hybrid" in loc:
+        tags.append("Remote-friendly")
+    if not any(t in tags for t in ("London", "Outside London")):
+        tags.append("UK-wide")
+    return tags
+
+
 # --- Notion sync ---------------------------------------------------------------
 
 def read_companies(cfg):
@@ -241,11 +270,14 @@ def read_existing_jobs(cfg):
                 "page_id": page["id"],
                 "status": notion.select_value(props["Status"]),
                 "sponsor": props["Licensed sponsor"]["checkbox"],
+                "discipline": notion.select_value(props["Discipline"]),
+                "location_tags": sorted(t["name"] for t in
+                                        props["Location tags"]["multi_select"]),
             }
     return existing
 
 
-def job_properties(job, company, today):
+def job_properties(job, company, today, cfg):
     return {
         "Role": notion.title(job["title"]),
         "Company": notion.select(company["name"]),
@@ -256,6 +288,8 @@ def job_properties(job, company, today):
         "First seen": notion.date(today),
         "Status": notion.select("Open"),
         "Source ID": notion.rich_text(job["source_id"]),
+        "Discipline": notion.select(classify_discipline(job, cfg)),
+        "Location tags": notion.multi_select(location_tags(job["location"], cfg)),
     }
 
 
@@ -269,7 +303,7 @@ def sync_company(company, jobs, existing, cfg, today, stats):
         feed_ids.add(job["source_id"])
         current = existing.get(job["source_id"])
         if current is None:
-            notion.create_page(jobs_db, job_properties(job, company, today))
+            notion.create_page(jobs_db, job_properties(job, company, today, cfg))
             stats["created"] += 1
         else:
             updates = {}
@@ -279,6 +313,12 @@ def sync_company(company, jobs, existing, cfg, today, stats):
                 stats["reopened"] += 1
             if current["sponsor"] != company["sponsor"]:
                 updates["Licensed sponsor"] = notion.checkbox(company["sponsor"])
+            discipline = classify_discipline(job, cfg)
+            if current["discipline"] != discipline:
+                updates["Discipline"] = notion.select(discipline)
+            tags = location_tags(job["location"], cfg)
+            if current["location_tags"] != sorted(tags):
+                updates["Location tags"] = notion.multi_select(tags)
             if updates:
                 notion.update_page(current["page_id"], updates)
 

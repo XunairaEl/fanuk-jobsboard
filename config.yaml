@@ -32,6 +32,17 @@ filters:
     - brighton
     - liverpool
     - milton keynes
+    - leicester
+    - ipswich
+    - southampton
+    - portsmouth
+    - york
+    - bath
+    - exeter
+    - swansea
+    - aberdeen
+    - dundee
+    - coventry
   # "UK" / "U.K." are matched separately with word boundaries so that
   # e.g. "Ukraine" does not slip through.
 
@@ -97,6 +108,18 @@ filters:
     - finance broker
     - broker
     - customer success
+
+# Discipline classification: first bucket whose keywords match the role's
+# title or department wins; roles matching nothing get "Other".
+disciplines:
+  Security: [security, cyber, infosec]
+  Data & AI: [data, machine learning, ml, ai, analytics, analyst, intelligence]
+  Research: [research, scientist, phd]
+  Product & Design: [product, design, designer, ux]
+  Engineering: [engineer, engineering, developer, software, devops, sre, reliability,
+                infrastructure, platform, cloud, backend, frontend, full stack,
+                full-stack, mobile, ios, android, qa, test, architect, technical,
+                network, database, solutions, support, it]
 
 sponsor_register:
   publication_url: "https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers"

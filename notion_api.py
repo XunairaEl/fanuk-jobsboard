@@ -93,6 +93,10 @@ def checkbox(value):
     return {"checkbox": bool(value)}
 
 
+def multi_select(names):
+    return {"multi_select": [{"name": n} for n in names]}
+
+
 def date(iso_date):
     return {"date": {"start": iso_date}} if iso_date else {"date": None}
 
