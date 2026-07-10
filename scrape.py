@@ -17,6 +17,7 @@ import argparse
 import datetime
 import re
 import sys
+import xml.etree.ElementTree as ET
 
 import requests
 import yaml
@@ -94,7 +95,63 @@ def fetch_lever(slug):
     return jobs
 
 
-ADAPTERS = {"greenhouse": fetch_greenhouse, "ashby": fetch_ashby, "lever": fetch_lever}
+def _teamtailor_location(jobposting):
+    places = jobposting.get("jobLocation") or []
+    if isinstance(places, dict):
+        places = [places]
+    names = []
+    for place in places:
+        addr = (place or {}).get("address") or {}
+        name = addr.get("addressLocality") or addr.get("addressRegion") or ""
+        country = addr.get("addressCountry") or ""
+        if name and country in ("GB", "UK"):
+            name += ", UK"
+        elif name and country:
+            name += f", {country}"
+        elif country:
+            name = country
+        if name:
+            names.append(name)
+    if not names and jobposting.get("jobLocationType") == "TELECOMMUTE":
+        names = ["Remote"]
+    return "; ".join(dict.fromkeys(names))
+
+
+def fetch_teamtailor(slug):
+    """slug is the careers-site hostname, e.g. careers.bluelightcard.co.uk
+    or {company}.teamtailor.com. Departments only exist in the RSS feed,
+    locations only in the JSON feed, so both are fetched and merged."""
+    base = f"https://{slug}"
+    resp = requests.get(f"{base}/jobs.json", timeout=FEED_TIMEOUT,
+                        headers={"User-Agent": "FAN-UK jobs board"})
+    resp.raise_for_status()
+
+    departments = {}
+    try:
+        rss = requests.get(f"{base}/jobs.rss", timeout=FEED_TIMEOUT,
+                           headers={"User-Agent": "FAN-UK jobs board"})
+        rss.raise_for_status()
+        ns = "{https://teamtailor.com/locations}"
+        for item in ET.fromstring(rss.content).findall(".//item"):
+            guid = item.findtext("guid", "")
+            departments[guid] = (item.findtext(f"{ns}department", "") or "").strip()
+    except Exception:
+        pass  # departments are a nice-to-have; the JSON feed remains canonical
+
+    jobs = []
+    for item in resp.json().get("items", []):
+        jobs.append({
+            "id": str(item["id"]),
+            "title": item.get("title", ""),
+            "location": _teamtailor_location(item.get("_jobposting") or {}),
+            "department": departments.get(str(item["id"]), ""),
+            "url": item.get("url", ""),
+        })
+    return jobs
+
+
+ADAPTERS = {"greenhouse": fetch_greenhouse, "ashby": fetch_ashby,
+            "lever": fetch_lever, "teamtailor": fetch_teamtailor}
 
 
 # --- filters ------------------------------------------------------------------

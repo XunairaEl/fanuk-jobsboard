@@ -111,4 +111,4 @@ dry_run_companies:
   - {name: TrueLayer, ats: greenhouse, slug: truelayer, sponsor: true}
   - {name: Thought Machine, ats: ashby, slug: thought-machine, sponsor: true}
   - {name: Multiverse, ats: ashby, slug: multiverse, sponsor: true}
-  - {name: Palantir, ats: lever, slug: palantir, sponsor: true}
+  - {name: Blue Light Card, ats: teamtailor, slug: careers.bluelightcard.co.uk, sponsor: true}
