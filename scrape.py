@@ -258,6 +258,15 @@ def main():
         print(f"{company['name']}: {len(raw)} in feed -> {len(kept)} kept")
         sync_company(company, kept, existing, cfg, today, stats)
 
+    # Orphans: open jobs whose company row was deleted from the Companies DB.
+    known_prefixes = {f"{c['ats']}:{c['slug']}:" for c in companies
+                      if c["ats"] and c["slug"]}
+    for source_id, current in existing.items():
+        if (current["status"] == "Open"
+                and not any(source_id.startswith(p) for p in known_prefixes)):
+            notion.update_page(current["page_id"], {"Status": notion.select("Closed")})
+            stats["closed"] += 1
+
     print(f"\nDone. Created {stats['created']}, reopened {stats['reopened']}, "
           f"closed {stats['closed']}. Feed failures: {failures or 'none'}")
     if failures and len(failures) == len([c for c in companies if c["active"]]):
