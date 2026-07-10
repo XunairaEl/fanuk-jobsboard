@@ -17,6 +17,7 @@ import argparse
 import datetime
 import re
 import sys
+import time
 import xml.etree.ElementTree as ET
 
 import requests
@@ -231,9 +232,62 @@ def fetch_workday(slug):
             return jobs
 
 
+RADANCY_CARD_RE = re.compile(
+    r'<a[^>]*href="(/job/[^"]+)"[^>]*data-job-id="(\d+)"[^>]*>(.*?)</a>'
+    r'.*?<(?:p|div)[^>]*class="job-location"[^>]*>([^<]*)<', re.S)
+
+
+def fetch_radancy(slug):
+    """Radancy (TMP) career-search sites, e.g. search.jobs.barclays.
+    slug = 'host|organizationId|ukLocationPath' where ukLocationPath is the
+    GeoNames id in the site's UK-filtered URL, e.g.
+    search.jobs.barclays/search-jobs/United%20Kingdom/13015/2/2635167/...
+    gives slug 'search.jobs.barclays|13015|2635167'. The results endpoint
+    returns JSON-wrapped HTML cards which are parsed with RADANCY_CARD_RE."""
+    import html as html_mod
+    host, org_id, loc_path = slug.split("|")
+    jobs, seen, page, total = [], set(), 1, None
+    while True:
+        resp = requests.get(
+            f"https://{host}/search-jobs/results",
+            params={"ActiveFacetID": 0, "CurrentPage": page, "RecordsPerPage": 50,
+                    "Distance": 50, "RadiusUnitType": 0, "Keywords": "",
+                    "Location": "United Kingdom", "LocationType": 2,
+                    "LocationPath": loc_path, "OrganizationIds": org_id,
+                    "ShowRadius": "False", "IsPagination": "True",
+                    "SearchResultsModuleName": "Search Results",
+                    "SearchFiltersModuleName": "Search Filters",
+                    "SortCriteria": 0, "SortDirection": 0, "SearchType": 5},
+            timeout=FEED_TIMEOUT,
+            headers={"User-Agent": "Mozilla/5.0 (FAN-UK jobs board)"})
+        resp.raise_for_status()
+        fragment = resp.json().get("results", "")
+        if total is None:
+            m = re.search(r'data-total-results="?(\d+)', fragment)
+            total = int(m.group(1)) if m else 0
+        batch = RADANCY_CARD_RE.findall(fragment)
+        for path, job_id, title_html, loc in batch:
+            if job_id in seen:
+                continue
+            seen.add(job_id)
+            title = " ".join(html_mod.unescape(re.sub(r"<[^>]+>", "", title_html)).split())
+            jobs.append({
+                "id": job_id,
+                "title": title,
+                "location": " ".join(html_mod.unescape(loc).split()),
+                "department": "",
+                "url": f"https://{host}{path}",
+            })
+        if not batch or len(jobs) >= total:
+            return jobs
+        page += 1
+        time.sleep(0.3)  # the endpoint is rate-limited (150 req / 15s window)
+
+
 ADAPTERS = {"greenhouse": fetch_greenhouse, "ashby": fetch_ashby,
             "lever": fetch_lever, "teamtailor": fetch_teamtailor,
-            "oraclecloud": fetch_oraclecloud, "workday": fetch_workday}
+            "oraclecloud": fetch_oraclecloud, "workday": fetch_workday,
+            "radancy": fetch_radancy}
 
 
 # --- filters ------------------------------------------------------------------
