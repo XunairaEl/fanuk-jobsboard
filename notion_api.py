@@ -94,7 +94,7 @@ def checkbox(value):
 
 
 def date(iso_date):
-    return {"date": {"start": iso_date}}
+    return {"date": {"start": iso_date}} if iso_date else {"date": None}
 
 
 # --- property value readers --------------------------------------------------

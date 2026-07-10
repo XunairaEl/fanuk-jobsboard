@@ -275,6 +275,7 @@ def sync_company(company, jobs, existing, cfg, today, stats):
             updates = {}
             if current["status"] != "Open":
                 updates["Status"] = notion.select("Open")
+                updates["Closed on"] = notion.date(None)
                 stats["reopened"] += 1
             if current["sponsor"] != company["sponsor"]:
                 updates["Licensed sponsor"] = notion.checkbox(company["sponsor"])
@@ -284,15 +285,19 @@ def sync_company(company, jobs, existing, cfg, today, stats):
     for source_id, current in existing.items():
         if (source_id.startswith(prefix) and source_id not in feed_ids
                 and current["status"] == "Open"):
-            notion.update_page(current["page_id"], {"Status": notion.select("Closed")})
+            notion.update_page(current["page_id"],
+                               {"Status": notion.select("Closed"),
+                                "Closed on": notion.date(today)})
             stats["closed"] += 1
 
 
-def close_all_for(company, existing, stats):
+def close_all_for(company, existing, stats, today):
     prefix = f"{company['ats']}:{company['slug']}:"
     for source_id, current in existing.items():
         if source_id.startswith(prefix) and current["status"] == "Open":
-            notion.update_page(current["page_id"], {"Status": notion.select("Closed")})
+            notion.update_page(current["page_id"],
+                               {"Status": notion.select("Closed"),
+                                "Closed on": notion.date(today)})
             stats["closed"] += 1
 
 
@@ -334,7 +339,7 @@ def main():
 
     for company in companies:
         if not company["active"]:
-            close_all_for(company, existing, stats)
+            close_all_for(company, existing, stats, today)
             continue
         if company["ats"] not in ADAPTERS or not company["slug"]:
             print(f"WARNING: {company['name']} skipped — missing/unknown ATS or slug")
