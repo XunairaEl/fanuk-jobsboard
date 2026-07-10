@@ -1,0 +1,19 @@
+name: Weekly sponsor register refresh
+
+on:
+  schedule:
+    - cron: "30 5 * * 1"   # Mondays 05:30 UTC, before the daily scrape
+  workflow_dispatch:
+
+jobs:
+  sponsors:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python sponsors.py
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}

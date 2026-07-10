@@ -1,0 +1,114 @@
+# FAN-UK jobs board scraper configuration.
+# Everything here is safe to commit — secrets live in environment variables / GitHub Secrets.
+
+notion:
+  jobs_database_id: "b8aa364d442b4b03b590f2d89d4c1d9b"
+  companies_database_id: "323b54fb84b8442385042783367c13d2"
+
+filters:
+  # A role is kept if its location matches the UK rules AND its title or
+  # department matches at least one tech keyword.
+  uk_location_substrings:
+    - united kingdom
+    - england
+    - scotland
+    - wales
+    - northern ireland
+    - london
+    - edinburgh
+    - glasgow
+    - manchester
+    - birmingham
+    - leeds
+    - bristol
+    - cardiff
+    - belfast
+    - cambridge
+    - oxford
+    - reading
+    - newcastle
+    - nottingham
+    - sheffield
+    - brighton
+    - liverpool
+    - milton keynes
+  # "UK" / "U.K." are matched separately with word boundaries so that
+  # e.g. "Ukraine" does not slip through.
+
+  tech_keywords:
+    - engineer
+    - engineering
+    - software
+    - developer
+    - data
+    - product
+    - design
+    - security
+    - cyber
+    - devops
+    - sre
+    - reliability
+    - cloud
+    - platform
+    - infrastructure
+    - machine learning
+    - ml
+    - ai
+    - analytics
+    - analyst
+    - scientist
+    - research
+    - qa
+    - quality
+    - test
+    - architect
+    - backend
+    - frontend
+    - full stack
+    - full-stack
+    - mobile
+    - ios
+    - android
+    - network
+    - database
+    - technical
+    - technology
+    - it
+    - solutions
+
+  # Roles whose TITLE matches any of these are excluded even if a tech keyword
+  # also matched (e.g. a sales role in a "Platform" department).
+  exclude_title_keywords:
+    - sales
+    - account executive
+    - account manager
+    - business development
+    - marketing
+    - recruiter
+    - recruiting
+    - talent
+    - people partner
+    - legal
+    - counsel
+    - payroll
+    - workplace
+    - office manager
+    - finance specialist
+    - finance broker
+    - broker
+    - customer success
+
+sponsor_register:
+  publication_url: "https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers"
+
+# Fallback company list used ONLY by `scrape.py --dry-run` (no Notion access).
+# The live pipeline always reads the Companies database in Notion.
+dry_run_companies:
+  - {name: Monzo, ats: greenhouse, slug: monzo, sponsor: true}
+  - {name: GoCardless, ats: greenhouse, slug: gocardless, sponsor: true}
+  - {name: Tide, ats: greenhouse, slug: tide, sponsor: true}
+  - {name: Skyscanner, ats: greenhouse, slug: skyscanner, sponsor: true}
+  - {name: TrueLayer, ats: greenhouse, slug: truelayer, sponsor: true}
+  - {name: Thought Machine, ats: ashby, slug: thought-machine, sponsor: true}
+  - {name: Multiverse, ats: ashby, slug: multiverse, sponsor: true}
+  - {name: Palantir, ats: lever, slug: palantir, sponsor: true}
