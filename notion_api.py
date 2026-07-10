@@ -66,6 +66,11 @@ def update_page(page_id, properties):
     return request("PATCH", f"/pages/{page_id}", {"properties": properties})
 
 
+def archive_page(page_id):
+    time.sleep(WRITE_DELAY_SECONDS)
+    return request("PATCH", f"/pages/{page_id}", {"archived": True})
+
+
 # --- property value builders -------------------------------------------------
 
 def title(text):

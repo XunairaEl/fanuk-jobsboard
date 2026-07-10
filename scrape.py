@@ -294,7 +294,7 @@ def main():
     today = datetime.date.today().isoformat()
     companies = read_companies(cfg)
     existing = read_existing_jobs(cfg)
-    stats = {"created": 0, "reopened": 0, "closed": 0}
+    stats = {"created": 0, "reopened": 0, "closed": 0, "archived": 0}
     failures = []
 
     for company in companies:
@@ -315,17 +315,19 @@ def main():
         print(f"{company['name']}: {len(raw)} in feed -> {len(kept)} kept")
         sync_company(company, kept, existing, cfg, today, stats)
 
-    # Orphans: open jobs whose company row was deleted from the Companies DB.
+    # Orphans: jobs whose company row was deleted from the Companies DB.
+    # Archived (removed) rather than closed — a deleted company has no
+    # reopen path, and closed leftovers clutter grouped views.
     known_prefixes = {f"{c['ats']}:{c['slug']}:" for c in companies
                       if c["ats"] and c["slug"]}
     for source_id, current in existing.items():
-        if (current["status"] == "Open"
-                and not any(source_id.startswith(p) for p in known_prefixes)):
-            notion.update_page(current["page_id"], {"Status": notion.select("Closed")})
-            stats["closed"] += 1
+        if not any(source_id.startswith(p) for p in known_prefixes):
+            notion.archive_page(current["page_id"])
+            stats["archived"] += 1
 
     print(f"\nDone. Created {stats['created']}, reopened {stats['reopened']}, "
-          f"closed {stats['closed']}. Feed failures: {failures or 'none'}")
+          f"closed {stats['closed']}, archived {stats['archived']} (orphans). "
+          f"Feed failures: {failures or 'none'}")
     if failures and len(failures) == len([c for c in companies if c["active"]]):
         sys.exit("All feeds failed — treating run as an error")
 
