@@ -36,13 +36,14 @@ filters:
     - ipswich
     - southampton
     - portsmouth
-    - york
     - bath
     - exeter
     - swansea
     - aberdeen
     - dundee
     - coventry
+    - osterley
+    - livingston
   # "UK" / "U.K." are matched separately with word boundaries so that
   # e.g. "Ukraine" does not slip through.
 
@@ -66,7 +67,7 @@ filters:
     - ml
     - ai
     - analytics
-    - analyst
+    - business analyst
     - scientist
     - research
     - qa
@@ -137,3 +138,8 @@ dry_run_companies:
   - {name: Blue Light Card, ats: teamtailor, slug: careers.bluelightcard.co.uk, sponsor: true}
   - {name: Oracle, ats: oraclecloud, slug: "eeho.fa.us2.oraclecloud.com|CX_45001|300000000106863", sponsor: true}
   - {name: Huawei R&D UK, ats: teamtailor, slug: huaweiuk.teamtailor.com, sponsor: true}
+  - {name: JP Morgan, ats: oraclecloud, slug: "jpmc.fa.oraclecloud.com|CX_1001|300000000289276", sponsor: true}
+  - {name: Sky, ats: workday, slug: "sky.wd3.myworkdayjobs.com|sky|sky_careers", sponsor: true}
+  - {name: Barclays, ats: workday, slug: "barclays.wd3.myworkdayjobs.com|barclays|External_Career_Site_Barclays", sponsor: true}
+  - {name: Citi, ats: workday, slug: "citi.wd5.myworkdayjobs.com|citi|2|Country_and_Jurisdiction=29247e57dbaf46fb855b224e03170bc7", sponsor: true}
+  - {name: Lloyds Banking Group, ats: workday, slug: "lbg.wd3.myworkdayjobs.com|lbg|LBG_Careers|ALL_UK", sponsor: true}

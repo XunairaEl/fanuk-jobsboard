@@ -184,9 +184,56 @@ def fetch_oraclecloud(slug):
             return jobs
 
 
+def fetch_workday(slug):
+    """Workday CXS. slug = 'host|tenant|site[|ukMode]' where ukMode is:
+    - omitted: jobs are filtered to the UK client-side (global tenants
+      whose country facet doesn't work, e.g. Barclays, Sky)
+    - 'ALL_UK': every job on this site is UK — skip the location filter
+      (UK-only employers whose multi-site roles show as 'N Locations')
+    - 'facetParam=GUID': apply a server-side country facet AND treat
+      results as UK (e.g. Citi Country_and_Jurisdiction=29247e57...)"""
+    parts = slug.split("|")
+    host, tenant, site = parts[0], parts[1], parts[2]
+    uk_mode = parts[3] if len(parts) > 3 else ""
+    applied, assume_uk = {}, False
+    if uk_mode == "ALL_UK":
+        assume_uk = True
+    elif "=" in uk_mode:
+        param, guid = uk_mode.split("=", 1)
+        applied[param] = [guid]
+        assume_uk = True
+
+    jobs, offset, total = [], 0, None
+    while True:
+        resp = requests.post(
+            f"https://{host}/wday/cxs/{tenant}/{site}/jobs",
+            json={"limit": 20, "offset": offset, "searchText": "",
+                  "appliedFacets": applied},
+            timeout=FEED_TIMEOUT,
+            headers={"Accept": "application/json", "User-Agent": "FAN-UK jobs board"})
+        resp.raise_for_status()
+        data = resp.json()
+        if total is None:  # Workday only reports total on the first page
+            total = int(data.get("total") or 0)
+        batch = data.get("jobPostings", [])
+        for j in batch:
+            path = j.get("externalPath", "")
+            jobs.append({
+                "id": path.rsplit("/", 1)[-1] if path else str(j.get("title", "")),
+                "title": j.get("title", ""),
+                "location": j.get("locationsText") or "",
+                "department": "",
+                "url": f"https://{host}/en-US/{site}{path}",
+                "assume_uk": assume_uk,
+            })
+        offset += len(batch)
+        if not batch or offset >= total:
+            return jobs
+
+
 ADAPTERS = {"greenhouse": fetch_greenhouse, "ashby": fetch_ashby,
             "lever": fetch_lever, "teamtailor": fetch_teamtailor,
-            "oraclecloud": fetch_oraclecloud}
+            "oraclecloud": fetch_oraclecloud, "workday": fetch_workday}
 
 
 # --- filters ------------------------------------------------------------------
@@ -209,7 +256,8 @@ def is_tech(job, cfg):
 
 
 def filtered_jobs(raw_jobs, cfg):
-    return [j for j in raw_jobs if is_uk(j["location"], cfg) and is_tech(j, cfg)]
+    return [j for j in raw_jobs
+            if (j.get("assume_uk") or is_uk(j["location"], cfg)) and is_tech(j, cfg)]
 
 
 def classify_discipline(job, cfg):
