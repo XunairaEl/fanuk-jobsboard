@@ -54,7 +54,9 @@ filters:
     - developer
     - data
     - product
-    - design
+    - designer
+    - product design
+    - ux
     - security
     - cyber
     - devops
@@ -85,6 +87,7 @@ filters:
     - database
     - technical
     - technology
+    - tech
     - it
     - solutions
 
