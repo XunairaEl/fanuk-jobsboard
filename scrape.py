@@ -150,8 +150,43 @@ def fetch_teamtailor(slug):
     return jobs
 
 
+def fetch_oraclecloud(slug):
+    """Oracle Recruiting Cloud. slug = 'host|siteNumber|locationFacetId',
+    e.g. 'eeho.fa.us2.oraclecloud.com|CX_45001|300000000106863' (the facet id
+    scopes results to a country server-side; find it via the API's
+    userTargetFacetInputTerm search)."""
+    host, site, location_id = slug.split("|")
+    jobs, offset = [], 0
+    while True:
+        finder = (f"findReqs;siteNumber={site},selectedLocationsFacet={location_id},"
+                  f"limit=200,offset={offset},sortBy=POSTING_DATES_DESC")
+        resp = requests.get(
+            f"https://{host}/hcmRestApi/resources/latest/recruitingCEJobRequisitions",
+            params={"onlyData": "true",
+                    "expand": "requisitionList.secondaryLocations",
+                    "finder": finder},
+            timeout=FEED_TIMEOUT, headers={"User-Agent": "FAN-UK jobs board"})
+        resp.raise_for_status()
+        item = resp.json()["items"][0]
+        batch = item.get("requisitionList", [])
+        for r in batch:
+            locations = [r.get("PrimaryLocation") or ""]
+            locations += [s.get("Name", "") for s in r.get("secondaryLocations", [])]
+            jobs.append({
+                "id": str(r["Id"]),
+                "title": r.get("Title", ""),
+                "location": "; ".join(dict.fromkeys(l for l in locations if l)),
+                "department": r.get("Department") or r.get("JobFamily") or "",
+                "url": f"https://{host}/hcmUI/CandidateExperience/en/sites/{site}/job/{r['Id']}",
+            })
+        offset += len(batch)
+        if not batch or offset >= int(item.get("TotalJobsCount") or 0):
+            return jobs
+
+
 ADAPTERS = {"greenhouse": fetch_greenhouse, "ashby": fetch_ashby,
-            "lever": fetch_lever, "teamtailor": fetch_teamtailor}
+            "lever": fetch_lever, "teamtailor": fetch_teamtailor,
+            "oraclecloud": fetch_oraclecloud}
 
 
 # --- filters ------------------------------------------------------------------

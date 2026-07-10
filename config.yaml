@@ -112,3 +112,5 @@ dry_run_companies:
   - {name: Thought Machine, ats: ashby, slug: thought-machine, sponsor: true}
   - {name: Multiverse, ats: ashby, slug: multiverse, sponsor: true}
   - {name: Blue Light Card, ats: teamtailor, slug: careers.bluelightcard.co.uk, sponsor: true}
+  - {name: Oracle, ats: oraclecloud, slug: "eeho.fa.us2.oraclecloud.com|CX_45001|300000000106863", sponsor: true}
+  - {name: Huawei R&D UK, ats: teamtailor, slug: huaweiuk.teamtailor.com, sponsor: true}
