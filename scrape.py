@@ -229,7 +229,28 @@ def fetch_workday(slug):
             })
         offset += len(batch)
         if not batch or offset >= total:
-            return jobs
+            break
+
+    # Multi-site postings only say "N Locations" in the list response; fetch
+    # their detail records to resolve real locations (skip if already UK-safe).
+    for job in jobs:
+        if job["assume_uk"] or not re.fullmatch(r"\d+ Locations?", job["location"]):
+            continue
+        path = job["url"].split(f"/{site}", 1)[-1]
+        try:
+            detail = requests.get(
+                f"https://{host}/wday/cxs/{tenant}/{site}{path}",
+                timeout=FEED_TIMEOUT,
+                headers={"Accept": "application/json",
+                         "User-Agent": "FAN-UK jobs board"}).json()
+            info = detail.get("jobPostingInfo") or {}
+            locations = [info.get("location") or ""] + (info.get("additionalLocations") or [])
+            resolved = "; ".join(l for l in locations if l)
+            if resolved:
+                job["location"] = resolved
+        except Exception:
+            pass  # keep "N Locations"; the UK filter will drop it conservatively
+    return jobs
 
 
 RADANCY_CARD_RE = re.compile(
