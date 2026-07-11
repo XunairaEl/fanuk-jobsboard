@@ -12,10 +12,13 @@ keeps a Notion database in sync. Members view a published Notion page.
 
 | Part | Where | Who controls it |
 |---|---|---|
-| Jobs board page + databases | Notion, "FAN-UK Jobs Board" page (Zunaira's account) | Admins edit the **Companies** DB only |
-| Scraper code | github.com/XunairaEl/fanuk-jobsboard | Developers |
-| Daily scrape (06:00 UTC) + weekly sponsor refresh (Mon 05:30 UTC) | GitHub Actions on that repo | Automatic; manual re-run from the Actions tab |
+| **Member-facing board** | https://xunairael.github.io/fanuk-jobsboard/ (GitHub Pages, `docs/index.html` + `docs/jobs.json`) | Members get ONLY this page; share the shortlink, never the raw URL |
+| Data + admin UI | Notion, "FAN-UK Jobs Board" page (Zunaira's account) — **never publish it to the web**; its views are admin conveniences only | Admins edit the **Companies** DB only |
+| Scraper + export code | github.com/XunairaEl/fanuk-jobsboard | Developers |
+| Daily scrape+export (06:00 UTC) + weekly sponsor refresh (Mon 05:30 UTC) | GitHub Actions on that repo | Automatic; manual re-run from the Actions tab |
 | Auth | `NOTION_TOKEN` repo secret → Notion internal integration connected to the page | Zunaira |
+
+The daily workflow ends by committing a fresh `docs/jobs.json` (exported from **Notion state**, so a transient feed failure never empties the public page). If the pipeline stops entirely, the page shows a "may be out of date" banner after 48h.
 
 ## Routine admin (no code)
 
@@ -44,6 +47,9 @@ Everything routine happens in the Notion **Companies** database — see the
 
 When the portal's job feature is ready, absorb this board rather than migrate it:
 
+0. Quickest possible integration: consume `docs/jobs.json` directly — it is a
+   clean, daily-refreshed feed of every open role (title, company, size,
+   location, tags, discipline, sponsor flag, first-seen date, apply URL).
 1. Reuse `scrape.py`'s adapters and filters; replace the Notion sync layer
    (`notion_api.py`) with Supabase writes. The pipeline re-derives all job data
    from the feeds, so there is no historical data to migrate.

@@ -1,11 +1,16 @@
-# FAN-UK Jobs Board Scraper
+# FAN-UK Jobs Board
 
-Keeps the [FAN-UK Jobs Board](https://www.notion.so) (Notion) up to date automatically.
-Runs daily on GitHub Actions: reads the **Companies** database in Notion, fetches each
-company's public careers feed (Greenhouse / Ashby / Lever), filters to **UK-based
-tech/CS roles**, and syncs the **Jobs** database. Roles that disappear from a feed are
-marked Closed. Weekly, the Home Office Register of Licensed Sponsors is re-downloaded
-to refresh each company's **Licensed sponsor** flag.
+**Member-facing board: https://xunairael.github.io/fanuk-jobsboard/** — a static
+filterable page (`docs/`) fed by `docs/jobs.json`, republished daily.
+
+The scraper runs daily on GitHub Actions: reads the **Companies** database in Notion,
+fetches each company's public careers feed (Greenhouse / Ashby / Lever / Teamtailor /
+Oracle Recruiting Cloud / Workday / Radancy), filters to **UK-based tech/CS roles**,
+syncs the Notion **Jobs** database, then exports open roles from Notion to
+`docs/jobs.json` (`export.py`). Roles that disappear from a feed are marked Closed.
+Weekly, the Home Office Register of Licensed Sponsors is re-downloaded to refresh each
+company's **Licensed sponsor** flag. The Notion page itself stays unpublished — it is
+the data store and admin UI, not the member experience.
 
 Adding/removing companies needs **no code changes** — admins edit the Companies
 database in Notion (see the "Admin — Companies & How it works" page there).
