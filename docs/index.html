@@ -7,28 +7,35 @@
 <meta property="og:title" content="FAN-UK Jobs Board">
 <meta property="og:description" content="UK tech & CS roles at companies where FAST alumni work — updated daily.">
 <meta property="og:type" content="website">
+<meta property="og:image" content="https://xunairael.github.io/fanuk-jobsboard/logo.png">
+<link rel="icon" type="image/png" href="logo.png">
 <title>FAN-UK Jobs Board</title>
 <style>
+  /* FAN-UK brand palette (from fan-uk.vercel.app portal theme) */
   :root {
-    --accent: #0b5e59;
-    --accent-soft: #e3f0ef;
-    --ink: #1b2733;
-    --muted: #5c6b7a;
-    --line: #e2e8ee;
-    --bg: #f7f9fb;
+    --accent: #143c62;        /* primary navy */
+    --focus: #1c69e3;         /* bright blue */
+    --accent-soft: #e6ecf2;   /* secondary */
+    --ink: #0b1723;
+    --muted: #5b646f;
+    --line: #dfe5ec;
+    --bg: #f3f5f8;
     --card: #ffffff;
-    --new: #b7501e;
+    --chip-on: #f6f9fc;       /* text on selected chip */
+    --new: #0a8a3a;           /* green echoing the NU mark */
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --accent: #5fc4bc;
-      --accent-soft: #123734;
-      --ink: #e8edf2;
-      --muted: #9aa8b5;
-      --line: #2a3542;
-      --bg: #121820;
-      --card: #1a232e;
-      --new: #e8935f;
+      --accent: #6ba3ec;
+      --focus: #6ba3ec;
+      --accent-soft: #16283c;
+      --ink: #eef2f7;
+      --muted: #93a1b0;
+      --line: #243447;
+      --bg: #0b1723;
+      --card: #12202e;
+      --chip-on: #071220;
+      --new: #3fce7c;
     }
   }
   * { box-sizing: border-box; }
@@ -39,7 +46,7 @@
   .wrap { max-width: 720px; margin: 0 auto; padding: 20px 16px 48px; }
   header h1 { font-size: 1.45rem; margin: 0 0 4px; }
   header p.tagline { margin: 0 0 4px; color: var(--muted); font-size: .95rem; }
-  header p.updated { margin: 0; color: var(--muted); font-size: .8rem; }
+  header p.updated { margin: 8px 0 0; color: var(--muted); font-size: .8rem; }
   .stale {
     display: none; background: #fff3cd; color: #6a4a00; border: 1px solid #e6c96b;
     border-radius: 8px; padding: 10px 12px; margin: 12px 0 0; font-size: .9rem;
@@ -49,7 +56,9 @@
     width: 100%; padding: 11px 14px; font-size: 1rem; color: var(--ink);
     background: var(--card); border: 1px solid var(--line); border-radius: 10px;
   }
-  .search:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+  .search:focus { outline: 2px solid var(--focus); border-color: var(--focus); }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand img { width: 46px; height: 46px; border-radius: 50%; flex: none; }
   .group { margin-top: 10px; }
   .group-label {
     font-size: .72rem; text-transform: uppercase; letter-spacing: .06em;
@@ -60,12 +69,9 @@
     border: 1px solid var(--line); background: var(--card); color: var(--ink);
     border-radius: 999px; padding: 6px 13px; font-size: .86rem; cursor: pointer;
   }
-  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .chip:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
   .chip[aria-pressed="true"] {
-    background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600;
-  }
-  @media (prefers-color-scheme: dark) {
-    .chip[aria-pressed="true"] { color: #06211f; }
+    background: var(--accent); border-color: var(--accent); color: var(--chip-on); font-weight: 600;
   }
   .count { margin: 16px 2px 10px; font-size: .88rem; color: var(--muted); }
   .count strong { color: var(--ink); }
@@ -103,8 +109,13 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>FAN-UK Jobs Board</h1>
-    <p class="tagline">UK tech &amp; CS roles at companies where FAST alumni work</p>
+    <div class="brand">
+      <img src="logo.png" alt="FAST Alumni Network United Kingdom">
+      <div>
+        <h1>FAN-UK Jobs Board</h1>
+        <p class="tagline">UK tech &amp; CS roles at companies where FAST alumni work</p>
+      </div>
+    </div>
     <p class="updated" id="updated"></p>
     <div class="stale" id="stale">⚠️ This list hasn’t refreshed recently and may be out of date.</div>
   </header>
