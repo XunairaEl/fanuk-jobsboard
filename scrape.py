@@ -360,7 +360,7 @@ def location_tags(location, cfg):
     if "remote" in loc or "hybrid" in loc:
         tags.append("Remote-friendly")
     if not any(t in tags for t in ("London", "Outside London")):
-        tags.append("UK-wide")
+        tags.append("UK (no city listed)")
     return tags
 
 
