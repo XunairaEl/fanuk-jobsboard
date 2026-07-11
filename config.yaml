@@ -144,6 +144,7 @@ dry_run_companies:
   - {name: Huawei R&D UK, ats: teamtailor, slug: huaweiuk.teamtailor.com, sponsor: true}
   - {name: JP Morgan, ats: oraclecloud, slug: "jpmc.fa.oraclecloud.com|CX_1001|300000000289276", sponsor: true}
   - {name: Sky, ats: skycareers, slug: careers.sky.com, sponsor: true}
+  - {name: Janes, ats: greenhouse, slug: janes, sponsor: true}
   - {name: Barclays, ats: radancy, slug: "search.jobs.barclays|13015|2635167", sponsor: true}
   - {name: Citi, ats: workday, slug: "citi.wd5.myworkdayjobs.com|citi|2|Country_and_Jurisdiction=29247e57dbaf46fb855b224e03170bc7", sponsor: true}
   - {name: Lloyds Banking Group, ats: workday, slug: "lbg.wd3.myworkdayjobs.com|lbg|LBG_Careers|ALL_UK", sponsor: true}
