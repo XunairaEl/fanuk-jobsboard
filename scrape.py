@@ -534,6 +534,9 @@ def main():
     if failures and len(failures) == len([c for c in companies if c["active"]]):
         sys.exit("All feeds failed — treating run as an error")
 
+    import export
+    export.export(cfg)
+
 
 if __name__ == "__main__":
     main()

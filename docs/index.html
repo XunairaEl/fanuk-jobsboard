@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:title" content="FAN-UK Jobs Board">
+<meta property="og:description" content="UK tech & CS roles at companies where FAST alumni work — updated daily.">
+<meta property="og:type" content="website">
+<title>FAN-UK Jobs Board</title>
+<style>
+  :root {
+    --accent: #0b5e59;
+    --accent-soft: #e3f0ef;
+    --ink: #1b2733;
+    --muted: #5c6b7a;
+    --line: #e2e8ee;
+    --bg: #f7f9fb;
+    --card: #ffffff;
+    --new: #b7501e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --accent: #5fc4bc;
+      --accent-soft: #123734;
+      --ink: #e8edf2;
+      --muted: #9aa8b5;
+      --line: #2a3542;
+      --bg: #121820;
+      --card: #1a232e;
+      --new: #e8935f;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 20px 16px 48px; }
+  header h1 { font-size: 1.45rem; margin: 0 0 4px; }
+  header p.tagline { margin: 0 0 4px; color: var(--muted); font-size: .95rem; }
+  header p.updated { margin: 0; color: var(--muted); font-size: .8rem; }
+  .stale {
+    display: none; background: #fff3cd; color: #6a4a00; border: 1px solid #e6c96b;
+    border-radius: 8px; padding: 10px 12px; margin: 12px 0 0; font-size: .9rem;
+  }
+  .filters { margin: 18px 0 6px; }
+  .search {
+    width: 100%; padding: 11px 14px; font-size: 1rem; color: var(--ink);
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+  }
+  .search:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+  .group { margin-top: 10px; }
+  .group-label {
+    font-size: .72rem; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--muted); margin: 0 0 5px 2px;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    border-radius: 999px; padding: 6px 13px; font-size: .86rem; cursor: pointer;
+  }
+  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .chip[aria-pressed="true"] {
+    background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600;
+  }
+  @media (prefers-color-scheme: dark) {
+    .chip[aria-pressed="true"] { color: #06211f; }
+  }
+  .count { margin: 16px 2px 10px; font-size: .88rem; color: var(--muted); }
+  .count strong { color: var(--ink); }
+  ul.jobs { list-style: none; margin: 0; padding: 0; }
+  .job {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 13px 15px; margin-bottom: 9px;
+  }
+  .job a.title {
+    color: var(--ink); font-weight: 650; text-decoration: none; font-size: 1rem;
+    display: block;
+  }
+  .job a.title:hover { color: var(--accent); text-decoration: underline; }
+  .job .co { color: var(--muted); font-size: .88rem; margin-top: 3px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .tag {
+    font-size: .74rem; padding: 2.5px 9px; border-radius: 999px;
+    background: var(--accent-soft); color: var(--accent); font-weight: 600;
+  }
+  .tag.sponsor { background: transparent; border: 1px solid var(--line); color: var(--muted); font-weight: 500; }
+  .tag.new { background: transparent; border: 1px solid var(--new); color: var(--new); }
+  .more {
+    display: block; width: 100%; margin: 14px 0; padding: 12px; font-size: .95rem;
+    background: var(--card); color: var(--accent); border: 1px solid var(--line);
+    border-radius: 10px; cursor: pointer; font-weight: 600;
+  }
+  .empty { text-align: center; color: var(--muted); padding: 40px 10px; }
+  footer {
+    margin-top: 34px; padding-top: 16px; border-top: 1px solid var(--line);
+    color: var(--muted); font-size: .8rem;
+  }
+  footer p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>FAN-UK Jobs Board</h1>
+    <p class="tagline">UK tech &amp; CS roles at companies where FAST alumni work</p>
+    <p class="updated" id="updated"></p>
+    <div class="stale" id="stale">⚠️ This list hasn’t refreshed recently and may be out of date.</div>
+  </header>
+
+  <div class="filters">
+    <input class="search" id="search" type="search" placeholder="Search roles or companies…" aria-label="Search roles or companies">
+    <div class="group"><p class="group-label">Company size</p><div class="chips" id="chips-size"></div></div>
+    <div class="group"><p class="group-label">Field</p><div class="chips" id="chips-discipline"></div></div>
+    <div class="group"><p class="group-label">Location</p><div class="chips" id="chips-tags"></div></div>
+    <div class="group"><p class="group-label">Visa</p><div class="chips" id="chips-sponsor"></div></div>
+  </div>
+
+  <p class="count" id="count"></p>
+  <ul class="jobs" id="jobs"></ul>
+  <button class="more" id="more" hidden></button>
+  <div class="empty" id="empty" hidden>No roles match these filters — try removing one.</div>
+
+  <footer>
+    <p>Updated automatically every day from the companies’ own careers pages. Every role links to the company’s application page.</p>
+    <p><strong>✓ Licensed sponsor</strong> means the company is on the UK Home Office Register of Licensed Sponsors (Skilled Worker route) — it can sponsor visas, but always confirm sponsorship for a specific role with the employer.</p>
+    <p>Want your employer on the board? Message the FAN-UK social media team on WhatsApp.</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var PAGE_SIZE = 100;
+  var state = { search: "", size: new Set(), discipline: new Set(), tags: new Set(), sponsor: false, shown: PAGE_SIZE };
+  var DATA = [];
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  function orderedValues(jobs, key, preferred) {
+    var present = new Set();
+    jobs.forEach(function (j) {
+      var v = j[key];
+      (Array.isArray(v) ? v : [v]).forEach(function (x) { if (x) present.add(x); });
+    });
+    var out = preferred.filter(function (p) { return present.has(p); });
+    Array.from(present).sort().forEach(function (v) { if (out.indexOf(v) < 0) out.push(v); });
+    return out;
+  }
+
+  function makeChips(containerId, values, set) {
+    var box = $(containerId);
+    values.forEach(function (v) {
+      var b = document.createElement("button");
+      b.className = "chip";
+      b.type = "button";
+      b.textContent = v;
+      b.setAttribute("aria-pressed", "false");
+      b.addEventListener("click", function () {
+        if (set.has(v)) { set.delete(v); b.setAttribute("aria-pressed", "false"); }
+        else { set.add(v); b.setAttribute("aria-pressed", "true"); }
+        state.shown = PAGE_SIZE;
+        render();
+      });
+      box.appendChild(b);
+    });
+  }
+
+  function matches(j) {
+    if (state.sponsor && !j.sponsor) return false;
+    if (state.size.size && !state.size.has(j.size)) return false;
+    if (state.discipline.size && !state.discipline.has(j.discipline)) return false;
+    if (state.tags.size && !j.tags.some(function (t) { return state.tags.has(t); })) return false;
+    if (state.search) {
+      var hay = (j.title + " " + j.company).toLowerCase();
+      if (hay.indexOf(state.search) < 0) return false;
+    }
+    return true;
+  }
+
+  function isNew(j) {
+    if (!j.first_seen) return false;
+    return (Date.now() - new Date(j.first_seen + "T00:00:00Z").getTime()) <= 7 * 864e5;
+  }
+
+  function card(j) {
+    var li = document.createElement("li");
+    li.className = "job";
+    var a = document.createElement("a");
+    a.className = "title";
+    a.textContent = j.title;
+    a.href = j.apply || "#";
+    a.target = "_blank";
+    a.rel = "noopener";
+    li.appendChild(a);
+    var co = document.createElement("div");
+    co.className = "co";
+    co.textContent = j.company + (j.location ? " · " + j.location : "");
+    li.appendChild(co);
+    var meta = document.createElement("div");
+    meta.className = "meta";
+    function tag(text, cls) {
+      var s = document.createElement("span");
+      s.className = "tag" + (cls ? " " + cls : "");
+      s.textContent = text;
+      meta.appendChild(s);
+    }
+    if (j.discipline) tag(j.discipline);
+    if (j.sponsor) tag("✓ Licensed sponsor", "sponsor");
+    if (isNew(j)) tag("NEW", "new");
+    li.appendChild(meta);
+    return li;
+  }
+
+  function render() {
+    var hits = DATA.filter(matches);
+    var list = $("jobs");
+    list.textContent = "";
+    hits.slice(0, state.shown).forEach(function (j) { list.appendChild(card(j)); });
+    $("count").innerHTML = "";
+    var c = $("count");
+    var strong = document.createElement("strong");
+    strong.textContent = hits.length;
+    c.appendChild(document.createTextNode("Showing "));
+    c.appendChild(strong);
+    c.appendChild(document.createTextNode(" of " + DATA.length + " open roles"));
+    $("empty").hidden = hits.length > 0;
+    var more = $("more");
+    if (hits.length > state.shown) {
+      more.hidden = false;
+      more.textContent = "Show all " + hits.length + " roles";
+      more.onclick = function () { state.shown = Infinity; render(); };
+    } else {
+      more.hidden = true;
+    }
+  }
+
+  fetch("jobs.json").then(function (r) { return r.json(); }).then(function (d) {
+    DATA = d.jobs || [];
+    var gen = new Date(d.generated_at);
+    $("updated").textContent = "Last updated " + gen.toLocaleDateString("en-GB",
+      { day: "numeric", month: "long", year: "numeric" }) + " · " + DATA.length + " open roles";
+    if (Date.now() - gen.getTime() > 48 * 36e5) $("stale").style.display = "block";
+
+    makeChips("chips-size",
+      orderedValues(DATA, "size", ["Enterprise (5000+)", "Mid-size (500-5000)", "Startup & scale-up (<500)"]),
+      state.size);
+    makeChips("chips-discipline",
+      orderedValues(DATA, "discipline", ["Engineering", "Data & AI", "Product & Design", "Security", "Research", "Other"]),
+      state.discipline);
+    makeChips("chips-tags",
+      orderedValues(DATA, "tags", ["London", "Outside London", "Remote-friendly", "UK-wide"]),
+      state.tags);
+
+    var sp = document.createElement("button");
+    sp.className = "chip";
+    sp.type = "button";
+    sp.textContent = "✓ Licensed sponsors only";
+    sp.setAttribute("aria-pressed", "false");
+    sp.addEventListener("click", function () {
+      state.sponsor = !state.sponsor;
+      sp.setAttribute("aria-pressed", String(state.sponsor));
+      state.shown = PAGE_SIZE;
+      render();
+    });
+    $("chips-sponsor").appendChild(sp);
+
+    $("search").addEventListener("input", function (e) {
+      state.search = e.target.value.trim().toLowerCase();
+      state.shown = PAGE_SIZE;
+      render();
+    });
+
+    render();
+  }).catch(function () {
+    $("count").textContent = "Couldn’t load the jobs list — please try again later.";
+  });
+})();
+</script>
+</body>
+</html>
