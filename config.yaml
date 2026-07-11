@@ -113,6 +113,13 @@ filters:
     - finance broker
     - broker
     - customer success
+    # market-research agency ladders (Ipsos-style), not R&D research
+    - research executive
+    - research manager
+    - research director
+    - qualitative research
+    - healthcare research
+    - project executive
 
 # Discipline classification: first bucket whose keywords match the role's
 # title or department wins; roles matching nothing get "Other".
@@ -145,6 +152,7 @@ dry_run_companies:
   - {name: JP Morgan, ats: oraclecloud, slug: "jpmc.fa.oraclecloud.com|CX_1001|300000000289276", sponsor: true}
   - {name: Sky, ats: skycareers, slug: careers.sky.com, sponsor: true}
   - {name: Janes, ats: greenhouse, slug: janes, sponsor: true}
+  - {name: Ipsos, ats: oraclecloud, slug: "ecqf.fa.em2.oraclecloud.com|IpsosCareers|300000000345058", sponsor: true}
   - {name: Barclays, ats: radancy, slug: "search.jobs.barclays|13015|2635167", sponsor: true}
   - {name: Citi, ats: workday, slug: "citi.wd5.myworkdayjobs.com|citi|2|Country_and_Jurisdiction=29247e57dbaf46fb855b224e03170bc7", sponsor: true}
   - {name: Lloyds Banking Group, ats: workday, slug: "lbg.wd3.myworkdayjobs.com|lbg|LBG_Careers|ALL_UK", sponsor: true}
