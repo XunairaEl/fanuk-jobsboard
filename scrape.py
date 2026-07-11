@@ -15,6 +15,7 @@ Usage:
 
 import argparse
 import datetime
+import json
 import re
 import sys
 import time
@@ -305,10 +306,46 @@ def fetch_radancy(slug):
         time.sleep(0.3)  # the endpoint is rate-limited (150 req / 15s window)
 
 
+SKY_JOB_RE = re.compile(r'\{"id":"\d+","title":.*?"job_requisition_id":"[^"]*"\}')
+
+
+def fetch_skycareers(slug):
+    """Sky's careers site (careers.sky.com) aggregates multiple ATS sources —
+    its public Workday feed carries only ~5 of ~85 jobs — so we parse the
+    complete job list embedded in the /jobs page payload. slug = hostname.
+    Fragile by nature (breaks if Sky rebuilds the site); a failure skips the
+    company and emails the repo owner like any other feed error."""
+    resp = requests.get(f"https://{slug}/jobs", timeout=FEED_TIMEOUT,
+                        headers={"User-Agent": "Mozilla/5.0 (FAN-UK jobs board)"})
+    resp.raise_for_status()
+    text = resp.text.replace('\\"', '"')
+    jobs, seen = [], set()
+    for blob in SKY_JOB_RE.findall(text):
+        try:
+            j = json.loads(blob)
+        except ValueError:
+            continue
+        rid = j.get("jobRequisitionId") or j.get("job_requisition_id") or j.get("id")
+        if not rid or rid in seen or not j.get("application_link"):
+            continue
+        seen.add(rid)
+        jobs.append({
+            "id": str(rid),
+            "title": j.get("title", ""),
+            "location": j.get("location", ""),
+            "department": j.get("team", ""),
+            "url": j.get("application_link", ""),
+        })
+    if not jobs:
+        raise RuntimeError("no jobs parsed from careers.sky.com payload — "
+                           "site structure may have changed")
+    return jobs
+
+
 ADAPTERS = {"greenhouse": fetch_greenhouse, "ashby": fetch_ashby,
             "lever": fetch_lever, "teamtailor": fetch_teamtailor,
             "oraclecloud": fetch_oraclecloud, "workday": fetch_workday,
-            "radancy": fetch_radancy}
+            "radancy": fetch_radancy, "skycareers": fetch_skycareers}
 
 
 # --- filters ------------------------------------------------------------------
