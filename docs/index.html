@@ -98,6 +98,11 @@
   }
   .job a.title:hover { color: var(--accent); text-decoration: underline; }
   .job .co { color: var(--muted); font-size: .88rem; margin-top: 3px; }
+  .co-link {
+    background: none; border: none; padding: 0; font: inherit; cursor: pointer;
+    color: var(--accent); text-decoration: underline; text-underline-offset: 2px;
+  }
+  .co-link:focus-visible { outline: 2px solid var(--focus); border-radius: 3px; }
   .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
   .tag {
     font-size: .74rem; padding: 2.5px 9px; border-radius: 999px;
@@ -200,7 +205,7 @@
     if (state.discipline.size && !state.discipline.has(j.discipline)) return false;
     if (state.tags.size && !j.tags.some(function (t) { return state.tags.has(t); })) return false;
     if (state.search) {
-      var hay = (j.title + " " + j.company).toLowerCase();
+      var hay = (j.title + " " + j.company + " " + j.location).toLowerCase();
       if (hay.indexOf(state.search) < 0) return false;
     }
     return true;
@@ -223,7 +228,20 @@
     li.appendChild(a);
     var co = document.createElement("div");
     co.className = "co";
-    co.textContent = j.company + (j.location ? " · " + j.location : "");
+    var cb = document.createElement("button");
+    cb.type = "button";
+    cb.className = "co-link";
+    cb.textContent = j.company;
+    cb.title = "Show all " + j.company + " roles";
+    cb.addEventListener("click", function () {
+      $("search").value = j.company;
+      state.search = j.company.toLowerCase();
+      state.shown = PAGE_SIZE;
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    co.appendChild(cb);
+    if (j.location) co.appendChild(document.createTextNode(" · " + j.location));
     li.appendChild(co);
     var meta = document.createElement("div");
     meta.className = "meta";
