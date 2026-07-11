@@ -51,6 +51,17 @@
     display: none; background: #fff3cd; color: #6a4a00; border: 1px solid #e6c96b;
     border-radius: 8px; padding: 10px 12px; margin: 12px 0 0; font-size: .9rem;
   }
+  details.about {
+    margin: 12px 0 0; font-size: .85rem; color: var(--muted);
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 9px 13px;
+  }
+  details.about summary {
+    cursor: pointer; color: var(--accent); font-weight: 600; list-style-position: inside;
+  }
+  details.about summary:focus-visible { outline: 2px solid var(--focus); border-radius: 4px; }
+  details.about p { margin: 8px 0 0; }
+  details.about strong { color: var(--ink); }
   .filters { margin: 18px 0 6px; }
   .search {
     width: 100%; padding: 11px 14px; font-size: 1rem; color: var(--ink);
@@ -118,6 +129,12 @@
     </div>
     <p class="updated" id="updated"></p>
     <div class="stale" id="stale">⚠️ This list hasn’t refreshed recently and may be out of date.</div>
+    <details class="about">
+      <summary>About this board &amp; the ✓ sponsor badge</summary>
+      <p>Updated automatically every day from the companies’ own careers pages. Every role links to the company’s application page.</p>
+      <p><strong>✓ Licensed sponsor</strong> means the company is on the UK Home Office Register of Licensed Sponsors (Skilled Worker route) — it can sponsor visas, but always confirm sponsorship for a specific role with the employer.</p>
+      <p>Want your employer on the board? Message the FAN-UK social media team on WhatsApp.</p>
+    </details>
   </header>
 
   <div class="filters">
@@ -134,8 +151,6 @@
   <div class="empty" id="empty" hidden>No roles match these filters — try removing one.</div>
 
   <footer>
-    <p>Updated automatically every day from the companies’ own careers pages. Every role links to the company’s application page.</p>
-    <p><strong>✓ Licensed sponsor</strong> means the company is on the UK Home Office Register of Licensed Sponsors (Skilled Worker route) — it can sponsor visas, but always confirm sponsorship for a specific role with the employer.</p>
     <p>Want your employer on the board? Message the FAN-UK social media team on WhatsApp.</p>
   </footer>
 </div>
