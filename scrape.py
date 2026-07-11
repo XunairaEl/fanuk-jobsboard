@@ -342,10 +342,58 @@ def fetch_skycareers(slug):
     return jobs
 
 
+BOOTS_CARD_RE = re.compile(
+    r'data-department="([^"]+)".*?job-card__title[^>]*>\s*'
+    r'<a[^>]*href="(https://[^"]+/jobs/([a-z0-9]+)-[^"]*)"[^>]*>\s*([^<]+)'
+    r'(.*?)(?=data-department="|\Z)', re.S)
+BOOTS_LOC_RE = re.compile(r'meta-icon-location.*?aria-label="View jobs for ([^."]+)', re.S)
+
+
+def fetch_bootsjobs(slug):
+    """boots.jobs (WordPress + admin-ajax search). slug = hostname.
+    Their function-area filter is broken server-side (counts filter, cards
+    don't), so we paginate the full unfiltered feed (~95 pages of 12) and let
+    the pipeline's own filters pick the tech roles. Department comes from the
+    card's data-department attribute (e.g. 'digital-tech-and-data')."""
+    base = f"https://{slug}/wp-admin/admin-ajax.php"
+    headers = {"User-Agent": "Mozilla/5.0 (FAN-UK jobs board)"}
+    nonce = requests.get(f"{base}?action=get_dynamic_nonces", timeout=FEED_TIMEOUT,
+                         headers=headers).json()["data"]["jobs_nonce"]
+    jobs, seen, page = [], set(), 1
+    while True:
+        payload = {"keyword": "", "location": "", "jobfeed": "external",
+                   "sort_by": "date", "page": page}
+        resp = requests.post(base, timeout=FEED_TIMEOUT, headers=headers,
+                             data={"action": "boots_job_search", "nonce": nonce,
+                                   "data": json.dumps(payload)})
+        resp.raise_for_status()
+        data = resp.json()["data"]
+        new = 0
+        import html as html_mod
+        for dept, url, job_id, title, tail in BOOTS_CARD_RE.findall(data["html"]):
+            if job_id in seen:
+                continue
+            seen.add(job_id)
+            new += 1
+            loc = BOOTS_LOC_RE.search(tail)
+            jobs.append({
+                "id": job_id,
+                "title": html_mod.unescape(" ".join(title.split())),
+                "location": html_mod.unescape(loc.group(1).strip()) if loc else "",
+                "department": dept.replace("-", " "),
+                "url": url,
+            })
+        if not data.get("has_more") or not new:
+            return jobs
+        page += 1
+        time.sleep(0.2)
+
+
 ADAPTERS = {"greenhouse": fetch_greenhouse, "ashby": fetch_ashby,
             "lever": fetch_lever, "teamtailor": fetch_teamtailor,
             "oraclecloud": fetch_oraclecloud, "workday": fetch_workday,
-            "radancy": fetch_radancy, "skycareers": fetch_skycareers}
+            "radancy": fetch_radancy, "skycareers": fetch_skycareers,
+            "bootsjobs": fetch_bootsjobs}
 
 
 # --- filters ------------------------------------------------------------------
